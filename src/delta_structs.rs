@@ -1,10 +1,10 @@
-// src/delta_structs.rs
 
+//code just contains a strcut for delta H and V so i can keep track easy and get with values instead of indices for clarity
 #[derive(Debug, Clone, Copy)]
 pub struct DeltaH {
     pub values: [u64; 8],
 }
-
+//dH initialization DOES matter, ie all gap penalty (-3 here)
 impl DeltaH {
     pub fn new(seq_len: usize) -> Self {
         let mut values = [0; 8];
@@ -14,10 +14,6 @@ impl DeltaH {
         }
         values[0] = neg_3;
         DeltaH { values }
-    }
-
-    pub fn zero() -> Self {
-        DeltaH { values: [0; 8] }
     }
 
     pub fn get(&self, index: i8) -> u64 {
@@ -44,6 +40,7 @@ pub struct DeltaV {
     pub values: [u64; 8],
 }
 
+//initialization does not matter no values are used before calculation
 impl DeltaV {
     pub fn new() -> Self {
         DeltaV { values: [0; 8] }
