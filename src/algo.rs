@@ -23,29 +23,28 @@ pub fn calculate_new_dv_values(
     dv: &mut DeltaV,
 ) {
     // Step 1: Calculate dV[4]
-    let dV_max_init = dh.get(-3) & matches_vectors[match_index];
-    let plus_dH_min = dV_max_init + dh.get(-3);
-    let xor_dH_min = plus_dH_min ^ dh.get(-3);
-    dv.set(4, (xor_dH_min ^ dV_max_init) >> 1);
+    let d_v_max_init = dh.get(-3) & matches_vectors[match_index];
+    let plus_d_h_min = d_v_max_init + dh.get(-3);
+    let xor_d_h_min = plus_d_h_min ^ dh.get(-3);
+    dv.set(4, xor_d_h_min ^ d_v_max_init);
 
     // Step 2: Calculate dV[3]
-    let dH_neg_2: u64 = 0;
-    let dH_pos_3_init = (dv.get(4) | matches_vectors[match_index]) & dH_neg_2;
-    let remain_dH_neg_3 = (dv.get(4) >> 1) ^ dh.get(-3);
-    dv.set(3, ((dH_pos_3_init << 1) + remain_dH_neg_3) ^ remain_dH_neg_3);
+    let d_v_pos_4_shifted_or_match = dv.get(4) | matches_vectors[match_index];
+    let d_h_pos_3_init = d_v_pos_4_shifted_or_match & dh.get(-2);
+    let remain_d_h_neg_3 = (dv.get(4) >> 1) ^ dh.get(-3);
+    dv.set(3, ((d_h_pos_3_init << 1) + remain_d_h_neg_3) ^ remain_d_h_neg_3);
 
     // Step 3: Calculate dV[2] down to dV[-3]
-    let dV_pos_4_shifted_or_match = dv.get(4) | matches_vectors[match_index];
-    let dV_not_4_to_3_shifted_or_match = !(dV_pos_4_shifted_or_match | dv.get(3));
+    let d_v_not_4_to_3_shifted_or_match = !(d_v_pos_4_shifted_or_match | dv.get(3));
 
-    dv.set(2, (dh.get(-1) & dV_pos_4_shifted_or_match) | (dh.get(-2) & dv.get(3)) | ((dh.get(-3) & dV_not_4_to_3_shifted_or_match) << 1));
-    dv.set(1, (dh.get(0) & dV_pos_4_shifted_or_match) | (dh.get(-1) & dv.get(3)) | ((dh.get(-2) & dV_not_4_to_3_shifted_or_match) << 1));
-    dv.set(0, (dh.get(1) & dV_pos_4_shifted_or_match) | (dh.get(0) & dv.get(3)) | ((dh.get(-1) & dV_not_4_to_3_shifted_or_match) << 1));
-    dv.set(-1, (dh.get(2) & dV_pos_4_shifted_or_match) | (dh.get(1) & dv.get(3)) | ((dh.get(0) & dV_not_4_to_3_shifted_or_match) << 1));
-    dv.set(-2, (dh.get(3) & dV_pos_4_shifted_or_match) | (dh.get(2) & dv.get(3)) | ((dh.get(1) & dV_not_4_to_3_shifted_or_match) << 1));
+    dv.set(2, ((dh.get(-1) & d_v_pos_4_shifted_or_match) | (dh.get(-2) & (dv.get(3) & !matches_vectors[match_index])) | (dh.get(-3) & d_v_not_4_to_3_shifted_or_match)) << 1);
+    dv.set(1, ((dh.get(0) & d_v_pos_4_shifted_or_match) | (dh.get(-1) & (dv.get(3) & !matches_vectors[match_index])) | (dh.get(-2) & d_v_not_4_to_3_shifted_or_match)) << 1);
+    dv.set(0, ((dh.get(1) & d_v_pos_4_shifted_or_match) | (dh.get(0) & (dv.get(3) & !matches_vectors[match_index])) | (dh.get(-1) & d_v_not_4_to_3_shifted_or_match)) << 1);
+    dv.set(-1, ((dh.get(2) & d_v_pos_4_shifted_or_match) | (dh.get(1) & (dv.get(3) & !matches_vectors[match_index])) | (dh.get(0) & d_v_not_4_to_3_shifted_or_match)) << 1);
+    dv.set(-2, ((dh.get(3) & d_v_pos_4_shifted_or_match) | (dh.get(2) & (dv.get(3) & !matches_vectors[match_index])) | (dh.get(1) & d_v_not_4_to_3_shifted_or_match)) << 1);
 
     let mut all_ones: u64 = 0;
-    for i in 0..seq1_len {
+    for i in 0..seq1_len+1 {
         all_ones |= 1 << i;
     }
 
@@ -59,7 +58,7 @@ pub fn calculate_new_dh_values(
     dh: &mut DeltaH,
     dv: &DeltaV,
 ) {
-    dh.set(4, (dh.get(4) | matches_vectors[match_index]));
+    dh.set(4, dh.get(4) | matches_vectors[match_index]);
     let dh_not_4_to_3 = !(dh.get(4) | dh.get(3));
 
     let new_dh_pos_4 = dh.get(4) & dv.get(-3);

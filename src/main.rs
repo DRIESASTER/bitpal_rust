@@ -76,12 +76,12 @@ fn main() -> io::Result<()> {
 
         println!("DeltaH Values:");
         for i in -3..=4 {
-            println!("  dH[{}]: {:08b}", i, dh.get(i)); // Corrected to 64 bits
+            println!("  dH[{}]: {:064b}", i, dh.get(i)); // Corrected to 64 bits
         }
 
         println!("DeltaV Values:");
         for i in -3..=4 {
-            println!("  dV[{}]: {:08b}", i, dv.get(i)); // Corrected to 64 bits
+            println!("  dV[{}]: {:064b}", i, dv.get(i)); // Corrected to 64 bits
         }
         println!();
     }
