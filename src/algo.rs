@@ -59,8 +59,13 @@ pub fn calculate_new_dh_values(
     dv: &DeltaV,
 ) {
     dh.set(4, dh.get(4) | matches_vectors[match_index]);
-    let dh_not_4_to_3 = !(dh.get(4) | dh.get(3));
+    for i in -3..=3 {
+        dh.set(i, dh.get(i) & !matches_vectors[match_index]);
+    }
+    let mut mask: u64 = u64::MAX; // Start with all bits set to 1
+    mask >>= 64 - seq1_len;       // Shift right to get seq1_len 1s at the right
 
+    let dh_not_4_to_3 = (!(dh.get(4) | dh.get(3))) & mask;
     let new_dh_pos_4 = dh.get(4) & dv.get(-3);
     let new_dh_pos_3 = (dh.get(3) & dv.get(-3)) | (dh.get(4) & dv.get(-2));
     let new_dh_pos_2 = (dh_not_4_to_3 & dv.get(-3)) | (dh.get(3) & dv.get(-2)) | (dh.get(4) & dv.get(-1));

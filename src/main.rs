@@ -37,6 +37,10 @@ fn read_fasta(filename: &str) -> io::Result<Vec<String>> {
     Ok(sequences)
 }
 
+fn count_set_bits(n: u64) -> u32 {
+    n.count_ones()
+}
+
 
 fn main() -> io::Result<()> {
     // --- Read sequences from FASTA file ---
@@ -72,18 +76,25 @@ fn main() -> io::Result<()> {
         };
 
         calculate_new_dv_values(seq1_len, &matches_vectors, match_index, &dh, &mut dv);
-        calculate_new_dh_values(seq1_len, &matches_vectors, match_index, &mut dh, &dv);
+        calculate_new_dh_values(seq1_len, &matches_vectors, match_index, &mut dh, &mut dv);
 
         println!("DeltaH Values:");
         for i in -3..=4 {
-            println!("  dH[{}]: {:064b}", i, dh.get(i)); // Corrected to 64 bits
+            println!("  dH[{}]: {:016b}", i, dh.get(i)); // Corrected to 64 bits
         }
 
         println!("DeltaV Values:");
         for i in -3..=4 {
-            println!("  dV[{}]: {:064b}", i, dv.get(i)); // Corrected to 64 bits
+            println!("  dV[{}]: {:016b}", i, dv.get(i)); // Corrected to 64 bits
         }
         println!();
     }
+    let mut alignment_score = seq2_len as i32 * -3;
+
+    for i in -3..=4 {
+        let bits_i = count_set_bits(dh.get(i)) as i32;
+        alignment_score += bits_i * i as i32;
+    }
+    println!("Alignment Score: {}", alignment_score);
     Ok(())
 }
