@@ -61,6 +61,7 @@ pub fn calculate_new_dh_values(
     dv: &DeltaV,
 ) {
     dh.set(4, dh.get(4) | matches_vectors[match_index]);
+
     for i in -3..=3 {
         dh.set(i, dh.get(i) & !matches_vectors[match_index]);
     }

@@ -1,5 +1,3 @@
-// src/main.rs
-
 mod delta_structs;
 mod algo;
 
@@ -8,6 +6,8 @@ use algo::{calculate_new_dh_values, calculate_new_dv_values, generate_match_vect
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::path::Path;
+use std::env;
+use std::process;
 
 // FASTA reader, written using gemini AI.
 fn read_fasta(filename: &str) -> io::Result<Vec<String>> {
@@ -43,11 +43,15 @@ fn count_set_bits(n: u64) -> u32 {
 
 
 fn main() -> io::Result<()> {
-    let sequences = read_fasta("sequences.fasta")?;
-    if sequences.len() < 2 {
-        eprintln!("Error: FASTA file must contain at least two sequences.");
-        std::process::exit(1);
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        eprintln!("Usage: {} <FASTA file>", args[0]);
+        process::exit(1);
     }
+
+    let filename = &args[1]; // Get filename from command-line arguments
+    let sequences = read_fasta(filename)?;
     let seq1 = &sequences[0];
     let seq2 = &sequences[1];
 
